@@ -127,11 +127,59 @@
       cursor: pointer;
     }
     #taskList button:hover { color: #D64545; }
+
+    .theme-row { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+
+    .swatch {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      padding: 0;
+      cursor: pointer;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
+    }
+    .swatch.selected { border-color: var(--text); }
+
+    .custom-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px 3px 3px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--card);
+      color: var(--text);
+      font-size: 12px;
+      cursor: pointer;
+      margin-left: 2px;
+    }
+    .custom-btn.selected { border-color: var(--text); }
+    .custom-btn-swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: conic-gradient(red, yellow, lime, cyan, blue, magenta, red);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+      flex-shrink: 0;
+    }
   </style>
 </head>
 <body>
   <div class="app">
     <h1>我的待办清单</h1>
+    <div class="theme-row" id="themeRow">
+      <button class="swatch" data-color="#002FA7" style="background:#002FA7" title="克莱因蓝"></button>
+      <button class="swatch" data-color="#1E3A5F" style="background:#1E3A5F" title="深蓝"></button>
+      <button class="swatch" data-color="#2F5233" style="background:#2F5233" title="墨绿"></button>
+      <button class="swatch" data-color="#2EC4B6" style="background:#2EC4B6" title="青绿"></button>
+      <button class="swatch" data-color="#D4A5A5" style="background:#D4A5A5" title="玫瑰金"></button>
+      <button type="button" class="custom-btn" id="customBtn">
+        <span class="custom-btn-swatch" id="customSwatch"></span>
+        自定义
+      </button>
+      <input type="color" id="customColor" value="#002FA7" style="display:none;">
+    </div>
     <div class="input-row">
       <input id="taskInput" type="text" placeholder="输入一件事">
       <button id="addBtn">添加</button>
@@ -154,6 +202,28 @@
     }
     var tasks = loadTasks();
     var currentFilter = 'all';
+
+    function applyAccent(color) {
+      document.documentElement.style.setProperty('--accent', color);
+      localStorage.setItem('my_theme_accent', color);
+      updateSelectedSwatch(color);
+    }
+
+    function updateSelectedSwatch(color) {
+      document.querySelectorAll('.swatch').forEach(function(el) {
+        el.classList.remove('selected');
+      });
+      var customBtn = document.getElementById('customBtn');
+      customBtn.classList.remove('selected');
+      var preset = document.querySelector('.swatch[data-color="' + color + '"]');
+      if (preset) {
+        preset.classList.add('selected');
+      } else {
+        document.getElementById('customColor').value = color;
+        document.getElementById('customSwatch').style.background = color;
+        customBtn.classList.add('selected');
+      }
+    }
 
     function setActiveButton(id) {
       document.getElementById('btnAll').classList.remove('active');
@@ -207,7 +277,7 @@
       });
     }
 
-    document.getElementById('addBtn').addEventListener('click', function() {
+    function addTask() {
       var input = document.getElementById('taskInput');
       var text = input.value.trim();
       if (text === '') return;
@@ -215,6 +285,14 @@
       input.value = '';
       saveTasks();
       render();
+    }
+
+    document.getElementById('addBtn').addEventListener('click', addTask);
+
+    document.getElementById('taskInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        addTask();
+      }
     });
 
     document.getElementById('btnAll').addEventListener('click', function() {
@@ -232,6 +310,28 @@
       setActiveButton('btnDone');
       render();
     });
+
+    document.querySelectorAll('.swatch[data-color]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        applyAccent(btn.dataset.color);
+      });
+    });
+
+    document.getElementById('customBtn').addEventListener('click', function() {
+      document.getElementById('customColor').click();
+    });
+
+    document.getElementById('customColor').addEventListener('input', function(e) {
+      applyAccent(e.target.value);
+    });
+
+    var savedAccent = localStorage.getItem('my_theme_accent');
+    if (savedAccent) {
+      document.documentElement.style.setProperty('--accent', savedAccent);
+      updateSelectedSwatch(savedAccent);
+    } else {
+      updateSelectedSwatch('#002FA7');
+    }
 
     render();
   </script>
