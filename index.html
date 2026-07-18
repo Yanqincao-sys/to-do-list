@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>我的待办清单</title>
+  <style>
+    :root {
+      --bg: #F5F8FB;
+      --card: #FFFFFF;
+      --text: #1A1A2E;
+      --text-done: #9DAFC0;
+      --accent: #002FA7;
+      --accent-text: #FFFFFF;
+      --line: #DCE5EE;
+      --done-bg: #EDF3F8;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+      display: flex;
+      justify-content: center;
+      padding: 48px 16px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 460px;
+      background: var(--card);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 2px 16px rgba(30, 58, 95, 0.08);
+    }
+
+    h1 {
+      color: var(--text);
+      font-size: 22px;
+      font-weight: 600;
+      text-align: center;
+      margin: 0 0 24px;
+      letter-spacing: 2px;
+    }
+
+    .input-row { display: flex; gap: 8px; margin-bottom: 14px; }
+
+    #taskInput {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--card);
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+    }
+    #taskInput::placeholder { color: var(--text-done); }
+    #taskInput:focus { border-color: var(--accent); }
+
+    #addBtn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      background: var(--accent);
+      color: var(--accent-text);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .filters { display: flex; gap: 6px; margin-bottom: 16px; }
+    .filters button {
+      flex: 1;
+      padding: 7px 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text-done);
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .filters button.active {
+      background: var(--accent);
+      color: var(--accent-text);
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+
+    #taskList { list-style: none; margin: 0; padding: 0; }
+
+    #taskList li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    #taskList li.done {
+      background: var(--done-bg);
+      border-bottom-color: transparent;
+    }
+
+    #taskList input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    #taskList span {
+      flex: 1;
+      color: var(--text);
+      font-size: 14px;
+      word-break: break-word;
+    }
+
+    #taskList button {
+      border: none;
+      background: transparent;
+      color: var(--text-done);
+      font-size: 13px;
+      cursor: pointer;
+    }
+    #taskList button:hover { color: #D64545; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>我的待办清单</h1>
+    <div class="input-row">
+      <input id="taskInput" type="text" placeholder="输入一件事">
+      <button id="addBtn">添加</button>
+    </div>
+    <div class="filters">
+      <button id="btnAll" class="active">全部</button>
+      <button id="btnActive">进行中</button>
+      <button id="btnDone">已完成</button>
+    </div>
+    <ul id="taskList"></ul>
+  </div>
+
+  <script>
+    function saveTasks() {
+      localStorage.setItem('my_tasks', JSON.stringify(tasks));
+    }
+    function loadTasks() {
+      var saved = localStorage.getItem('my_tasks');
+      return saved ? JSON.parse(saved) : [];
+    }
+    var tasks = loadTasks();
+    var currentFilter = 'all';
+
+    function setActiveButton(id) {
+      document.getElementById('btnAll').classList.remove('active');
+      document.getElementById('btnActive').classList.remove('active');
+      document.getElementById('btnDone').classList.remove('active');
+      document.getElementById(id).classList.add('active');
+    }
+
+    function render() {
+      var visibleTasks = tasks.filter(function(task) {
+        if (currentFilter === 'active') return !task.completed;
+        if (currentFilter === 'done') return task.completed;
+        return true;
+      });
+
+      var listEl = document.getElementById('taskList');
+      listEl.innerHTML = '';
+      visibleTasks.forEach(function(task) {
+        var index = tasks.indexOf(task);
+        var li = document.createElement('li');
+        if (task.completed) { li.className = 'done'; }
+
+        var checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = task.completed;
+        checkbox.addEventListener('change', function() {
+          task.completed = !task.completed;
+          saveTasks();
+          render();
+        });
+
+        var span = document.createElement('span');
+        span.textContent = task.text;
+        if (task.completed) {
+          span.style.textDecoration = 'line-through';
+          span.style.color = 'var(--text-done)';
+        }
+
+        var delBtn = document.createElement('button');
+        delBtn.textContent = '删除';
+        delBtn.addEventListener('click', function() {
+          tasks.splice(index, 1);
+          saveTasks();
+          render();
+        });
+
+        li.appendChild(checkbox);
+        li.appendChild(span);
+        li.appendChild(delBtn);
+        listEl.appendChild(li);
+      });
+    }
+
+    document.getElementById('addBtn').addEventListener('click', function() {
+      var input = document.getElementById('taskInput');
+      var text = input.value.trim();
+      if (text === '') return;
+      tasks.push({ text: text, completed: false });
+      input.value = '';
+      saveTasks();
+      render();
+    });
+
+    document.getElementById('btnAll').addEventListener('click', function() {
+      currentFilter = 'all';
+      setActiveButton('btnAll');
+      render();
+    });
+    document.getElementById('btnActive').addEventListener('click', function() {
+      currentFilter = 'active';
+      setActiveButton('btnActive');
+      render();
+    });
+    document.getElementById('btnDone').addEventListener('click', function() {
+      currentFilter = 'done';
+      setActiveButton('btnDone');
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
