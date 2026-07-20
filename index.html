@@ -171,33 +171,143 @@
       box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
       flex-shrink: 0;
     }
+
+    .view-nav { display: flex; gap: 8px; margin-bottom: 18px; }
+    .view-nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--card);
+      color: var(--text-done);
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .view-nav-btn svg { display: block; }
+    .view-nav-btn.active {
+      background: var(--accent);
+      color: var(--accent-text);
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+
+    .calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .cal-nav-btns { display: flex; align-items: center; gap: 4px; }
+    .cal-nav-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-done);
+      font-size: 16px;
+      cursor: pointer;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+    .cal-nav-btn:hover { background: var(--done-bg); }
+    .cal-title { font-size: 15px; font-weight: 600; color: var(--text); padding: 0 4px; }
+    .cal-today-btn {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--text);
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 14px; }
+    .cal-weekday { text-align: center; font-size: 11px; color: var(--text-done); padding-bottom: 4px; }
+    .cal-day {
+      min-height: 50px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      padding: 4px;
+      cursor: pointer;
+      overflow: hidden;
+    }
+    .cal-day.empty { border-color: transparent; cursor: default; }
+    .cal-day.is-today { border-color: var(--accent); }
+    .cal-day.selected { background: var(--done-bg); border-color: var(--accent); }
+    .cal-day-num { font-size: 11px; color: var(--text); margin-bottom: 3px; }
+    .cal-day.has-tasks .cal-day-num { font-weight: 600; }
+    .cal-dot-row { display: flex; flex-wrap: wrap; gap: 2px; }
+    .cal-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+    .cal-dot.done { background: var(--text-done); }
+
+    .day-detail { border-top: 1px solid var(--line); padding-top: 12px; }
+    .day-detail-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+    .day-detail-empty { font-size: 13px; color: var(--text-done); padding: 4px 0 8px; }
+    .day-detail-list { list-style: none; margin: 0; padding: 0; }
+    .day-detail-list li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 4px;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+      color: var(--text);
+    }
+    .day-detail-list li.done { color: var(--text-done); text-decoration: line-through; }
+    .day-detail-list li .dd-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+    .day-detail-list li.done .dd-dot { background: var(--text-done); }
   </style>
 </head>
 <body>
   <div class="app">
     <h1>我的待办清单</h1>
-    <div class="theme-row" id="themeRow">
-      <button class="swatch" data-color="#002FA7" style="background:#002FA7" title="克莱因蓝"></button>
-      <button class="swatch" data-color="#1E3A5F" style="background:#1E3A5F" title="深蓝"></button>
-      <button class="swatch" data-color="#2F5233" style="background:#2F5233" title="墨绿"></button>
-      <button class="swatch" data-color="#2EC4B6" style="background:#2EC4B6" title="青绿"></button>
-      <button class="swatch" data-color="#D4A5A5" style="background:#D4A5A5" title="玫瑰金"></button>
-      <button type="button" class="custom-btn" id="customBtn">
-        <span class="custom-btn-swatch" id="customSwatch"></span>
-        自定义
+    <div class="view-nav">
+      <button type="button" class="view-nav-btn active" id="navToday" title="今天">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>
+        <span>今天</span>
       </button>
-      <input type="color" id="customColor" value="#002FA7" style="display:none;">
+      <button type="button" class="view-nav-btn" id="navCalendar" title="日历">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 9h18"/></svg>
+        <span>日历</span>
+      </button>
     </div>
-    <div class="input-row">
-      <input id="taskInput" type="text" placeholder="输入一件事">
-      <button id="addBtn">添加</button>
+
+    <div id="todayView">
+      <div class="theme-row" id="themeRow">
+        <button class="swatch" data-color="#002FA7" style="background:#002FA7" title="克莱因蓝"></button>
+        <button class="swatch" data-color="#1E3A5F" style="background:#1E3A5F" title="深蓝"></button>
+        <button class="swatch" data-color="#2F5233" style="background:#2F5233" title="墨绿"></button>
+        <button class="swatch" data-color="#2EC4B6" style="background:#2EC4B6" title="青绿"></button>
+        <button class="swatch" data-color="#D4A5A5" style="background:#D4A5A5" title="玫瑰金"></button>
+        <button type="button" class="custom-btn" id="customBtn">
+          <span class="custom-btn-swatch" id="customSwatch"></span>
+          自定义
+        </button>
+        <input type="color" id="customColor" value="#002FA7" style="display:none;">
+      </div>
+      <div class="input-row">
+        <input id="taskInput" type="text" placeholder="输入一件事">
+        <button id="addBtn">添加</button>
+      </div>
+      <div class="filters">
+        <button id="btnAll">全部</button>
+        <button id="btnActive" class="active">进行中</button>
+        <button id="btnDone">已完成</button>
+      </div>
+      <ul id="taskList"></ul>
     </div>
-    <div class="filters">
-      <button id="btnAll" class="active">全部</button>
-      <button id="btnActive">进行中</button>
-      <button id="btnDone">已完成</button>
+
+    <div id="calendarView" style="display:none;">
+      <div class="calendar-header">
+        <div class="cal-nav-btns">
+          <button type="button" class="cal-nav-btn" id="calPrevBtn">‹</button>
+          <span class="cal-title" id="calTitle"></span>
+          <button type="button" class="cal-nav-btn" id="calNextBtn">›</button>
+        </div>
+        <button type="button" class="cal-today-btn" id="calTodayBtn">回到今天</button>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+      <div class="day-detail">
+        <div class="day-detail-title" id="dayDetailTitle"></div>
+        <div class="day-detail-empty" id="dayDetailEmpty">这天没有任务</div>
+        <ul class="day-detail-list" id="dayDetailList"></ul>
+      </div>
     </div>
-    <ul id="taskList"></ul>
   </div>
 
   <script>
@@ -209,7 +319,25 @@
       return saved ? JSON.parse(saved) : [];
     }
     var tasks = loadTasks();
-    var currentFilter = 'all';
+
+    function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+    function todayStr() {
+      var d = new Date();
+      return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+    }
+
+    (function migrateTaskDates() {
+      var changed = false;
+      tasks.forEach(function(t) {
+        if (!t.date) { t.date = todayStr(); changed = true; }
+      });
+      if (changed) saveTasks();
+    })();
+
+    var currentFilter = 'active';
+    var currentView = 'today';
+    var calendarYear, calendarMonth, selectedDate;
+    var WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
 
     function applyAccent(color) {
       document.documentElement.style.setProperty('--accent', color);
@@ -242,6 +370,7 @@
 
     function render() {
       var visibleTasks = tasks.filter(function(task) {
+        if (task.date !== todayStr()) return false;
         if (currentFilter === 'active') return !task.completed;
         if (currentFilter === 'done') return task.completed;
         return true;
@@ -289,7 +418,7 @@
       var input = document.getElementById('taskInput');
       var text = input.value.trim();
       if (text === '') return;
-      tasks.push({ text: text, completed: false });
+      tasks.push({ text: text, completed: false, date: todayStr() });
       input.value = '';
       saveTasks();
       render();
@@ -331,6 +460,143 @@
 
     document.getElementById('customColor').addEventListener('input', function(e) {
       applyAccent(e.target.value);
+    });
+
+    function switchView(view) {
+      currentView = view;
+      document.getElementById('todayView').style.display = view === 'today' ? '' : 'none';
+      document.getElementById('calendarView').style.display = view === 'calendar' ? '' : 'none';
+      document.getElementById('navToday').classList.toggle('active', view === 'today');
+      document.getElementById('navCalendar').classList.toggle('active', view === 'calendar');
+      if (view === 'calendar') {
+        var t = new Date();
+        calendarYear = t.getFullYear();
+        calendarMonth = t.getMonth();
+        renderCalendar();
+        selectDay(todayStr());
+      }
+    }
+
+    function renderCalendar() {
+      var grid = document.getElementById('calendarGrid');
+      grid.innerHTML = '';
+      WEEKDAYS.forEach(function(w) {
+        var el = document.createElement('div');
+        el.className = 'cal-weekday';
+        el.textContent = w;
+        grid.appendChild(el);
+      });
+
+      document.getElementById('calTitle').textContent = calendarYear + '年' + (calendarMonth + 1) + '月';
+
+      var firstDay = new Date(calendarYear, calendarMonth, 1);
+      var startWeekday = firstDay.getDay();
+      var daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+
+      var tasksByDate = {};
+      tasks.forEach(function(t) {
+        if (!tasksByDate[t.date]) tasksByDate[t.date] = [];
+        tasksByDate[t.date].push(t);
+      });
+
+      for (var i = 0; i < startWeekday; i++) {
+        var empty = document.createElement('div');
+        empty.className = 'cal-day empty';
+        grid.appendChild(empty);
+      }
+
+      var todayString = todayStr();
+
+      for (var day = 1; day <= daysInMonth; day++) {
+        (function(day) {
+          var dateStr = calendarYear + '-' + pad2(calendarMonth + 1) + '-' + pad2(day);
+          var cell = document.createElement('div');
+          cell.className = 'cal-day';
+          if (dateStr === todayString) cell.classList.add('is-today');
+          if (dateStr === selectedDate) cell.classList.add('selected');
+
+          var dayTasks = tasksByDate[dateStr] || [];
+          if (dayTasks.length > 0) cell.classList.add('has-tasks');
+
+          var num = document.createElement('div');
+          num.className = 'cal-day-num';
+          num.textContent = day;
+          cell.appendChild(num);
+
+          var dotRow = document.createElement('div');
+          dotRow.className = 'cal-dot-row';
+          dayTasks.slice(0, 6).forEach(function(t) {
+            var dot = document.createElement('span');
+            dot.className = 'cal-dot' + (t.completed ? ' done' : '');
+            dotRow.appendChild(dot);
+          });
+          cell.appendChild(dotRow);
+
+          cell.addEventListener('click', function() {
+            selectDay(dateStr);
+          });
+
+          grid.appendChild(cell);
+        })(day);
+      }
+    }
+
+    function selectDay(dateStr) {
+      selectedDate = dateStr;
+      renderCalendar();
+      renderDayDetail(dateStr);
+    }
+
+    function renderDayDetail(dateStr) {
+      var titleEl = document.getElementById('dayDetailTitle');
+      var listEl = document.getElementById('dayDetailList');
+      var emptyEl = document.getElementById('dayDetailEmpty');
+
+      var parts = dateStr.split('-');
+      var label = parseInt(parts[1], 10) + '月' + parseInt(parts[2], 10) + '日';
+      if (dateStr === todayStr()) label += '（今天）';
+      titleEl.textContent = label;
+
+      var dayTasks = tasks.filter(function(t) { return t.date === dateStr; });
+      listEl.innerHTML = '';
+      if (dayTasks.length === 0) {
+        emptyEl.style.display = 'block';
+        listEl.style.display = 'none';
+      } else {
+        emptyEl.style.display = 'none';
+        listEl.style.display = 'block';
+        dayTasks.forEach(function(t) {
+          var li = document.createElement('li');
+          if (t.completed) li.className = 'done';
+          var dot = document.createElement('span');
+          dot.className = 'dd-dot';
+          var span = document.createElement('span');
+          span.textContent = t.text;
+          li.appendChild(dot);
+          li.appendChild(span);
+          listEl.appendChild(li);
+        });
+      }
+    }
+
+    document.getElementById('navToday').addEventListener('click', function() { switchView('today'); });
+    document.getElementById('navCalendar').addEventListener('click', function() { switchView('calendar'); });
+    document.getElementById('calPrevBtn').addEventListener('click', function() {
+      calendarMonth--;
+      if (calendarMonth < 0) { calendarMonth = 11; calendarYear--; }
+      renderCalendar();
+    });
+    document.getElementById('calNextBtn').addEventListener('click', function() {
+      calendarMonth++;
+      if (calendarMonth > 11) { calendarMonth = 0; calendarYear++; }
+      renderCalendar();
+    });
+    document.getElementById('calTodayBtn').addEventListener('click', function() {
+      var t = new Date();
+      calendarYear = t.getFullYear();
+      calendarMonth = t.getMonth();
+      renderCalendar();
+      selectDay(todayStr());
     });
 
     var savedAccent = localStorage.getItem('my_theme_accent');
