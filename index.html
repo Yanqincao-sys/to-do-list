@@ -370,7 +370,6 @@
 
     function render() {
       var visibleTasks = tasks.filter(function(task) {
-        if (task.date !== todayStr()) return false;
         if (currentFilter === 'active') return !task.completed;
         if (currentFilter === 'done') return task.completed;
         return true;
