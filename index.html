@@ -253,7 +253,31 @@
     .cal-dot.done { background: var(--text-done); }
 
     .day-detail { border-top: 1px solid var(--line); padding-top: 12px; }
-    .day-detail-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+    .day-detail-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+
+    .day-add-row { display: flex; gap: 8px; margin-bottom: 12px; }
+    #dayDetailInput {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--card);
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+    }
+    #dayDetailInput::placeholder { color: var(--text-done); }
+    #dayDetailInput:focus { border-color: var(--accent); }
+    #dayDetailAddBtn {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 8px;
+      background: var(--accent);
+      color: var(--accent-text);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
     .day-detail-empty { font-size: 13px; color: var(--text-done); padding: 4px 0 8px; }
     .day-detail-list { list-style: none; margin: 0; padding: 0; }
     .day-detail-list li {
@@ -321,6 +345,10 @@
       <div class="calendar-grid" id="calendarGrid"></div>
       <div class="day-detail">
         <div class="day-detail-title" id="dayDetailTitle"></div>
+        <div class="day-add-row">
+          <input id="dayDetailInput" type="text" placeholder="为这天添加任务">
+          <button id="dayDetailAddBtn">添加</button>
+        </div>
         <div class="day-detail-empty" id="dayDetailEmpty">这天没有任务</div>
         <ul class="day-detail-list" id="dayDetailList"></ul>
       </div>
@@ -635,6 +663,27 @@
         });
       }
     }
+
+    function addTaskForDate(dateStr) {
+      var input = document.getElementById('dayDetailInput');
+      var text = input.value.trim();
+      if (text === '') return;
+      tasks.push({ text: text, completed: false, date: dateStr });
+      input.value = '';
+      saveTasks();
+      renderCalendar();
+      renderDayDetail(dateStr);
+      if (currentView === 'today') render();
+    }
+
+    document.getElementById('dayDetailAddBtn').addEventListener('click', function() {
+      addTaskForDate(selectedDate);
+    });
+    document.getElementById('dayDetailInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        addTaskForDate(selectedDate);
+      }
+    });
 
     document.getElementById('navToday').addEventListener('click', function() { switchView('today'); });
     document.getElementById('navCalendar').addEventListener('click', function() { switchView('calendar'); });
