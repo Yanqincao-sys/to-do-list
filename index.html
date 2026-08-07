@@ -125,7 +125,12 @@
       color: var(--text);
       font-size: 14px;
       word-break: break-word;
+      cursor: pointer;
+      border-radius: 6px;
+      padding: 3px 6px;
+      margin: -3px -6px;
     }
+    #taskList span:hover { background: var(--done-bg); }
 
     #taskList button {
       border: none;
@@ -135,6 +140,18 @@
       cursor: pointer;
     }
     #taskList button:hover { color: #D64545; }
+
+    .edit-input {
+      flex: 1;
+      padding: 5px 8px;
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      background: var(--card);
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+    }
 
     .theme-row { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
 
@@ -393,10 +410,14 @@
 
         var span = document.createElement('span');
         span.textContent = task.text;
+        span.className = 'task-text';
         if (task.completed) {
           span.style.textDecoration = 'line-through';
           span.style.color = 'var(--text-done)';
         }
+        span.addEventListener('click', function() {
+          startEdit(li, task, span);
+        });
 
         var delBtn = document.createElement('button');
         delBtn.textContent = '删除';
@@ -411,6 +432,43 @@
         li.appendChild(delBtn);
         listEl.appendChild(li);
       });
+    }
+
+    function startEdit(li, task, span) {
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'edit-input';
+      input.value = task.text;
+
+      li.replaceChild(input, span);
+      input.focus();
+      input.select();
+
+      var done = false;
+      function commit() {
+        if (done) return;
+        done = true;
+        var newText = input.value.trim();
+        if (newText !== '') {
+          task.text = newText;
+          saveTasks();
+        }
+        render();
+      }
+      function cancel() {
+        if (done) return;
+        done = true;
+        render();
+      }
+
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          commit();
+        } else if (e.key === 'Escape') {
+          cancel();
+        }
+      });
+      input.addEventListener('blur', commit);
     }
 
     function addTask() {
