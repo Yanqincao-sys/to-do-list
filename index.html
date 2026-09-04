@@ -421,6 +421,11 @@
         return true;
       });
 
+      visibleTasks.sort(function(a, b) {
+        if (a.completed === b.completed) return 0;
+        return a.completed ? 1 : -1;
+      });
+
       var listEl = document.getElementById('taskList');
       listEl.innerHTML = '';
       visibleTasks.forEach(function(task) {
@@ -435,9 +440,7 @@
           task.completed = checkbox.checked;
           task.completedDate = task.completed ? todayStr() : null;
           saveTasks();
-          li.classList.toggle('done', task.completed);
-          span.style.textDecoration = task.completed ? 'line-through' : 'none';
-          span.style.color = task.completed ? 'var(--text-done)' : '';
+          render();
         });
 
         var span = document.createElement('span');
@@ -507,7 +510,7 @@
       var input = document.getElementById('taskInput');
       var text = input.value.trim();
       if (text === '') return;
-      tasks.push({ text: text, completed: false, date: todayStr() });
+      tasks.unshift({ text: text, completed: false, date: todayStr() });
       input.value = '';
       saveTasks();
       render();
@@ -672,7 +675,7 @@
       var input = document.getElementById('dayDetailInput');
       var text = input.value.trim();
       if (text === '') return;
-      tasks.push({ text: text, completed: false, date: dateStr });
+      tasks.unshift({ text: text, completed: false, date: dateStr });
       input.value = '';
       saveTasks();
       renderCalendar();
