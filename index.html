@@ -432,9 +432,11 @@
         checkbox.type = 'checkbox';
         checkbox.checked = task.completed;
         checkbox.addEventListener('change', function() {
-          task.completed = !task.completed;
+          task.completed = checkbox.checked;
           saveTasks();
-          render();
+          li.classList.toggle('done', task.completed);
+          span.style.textDecoration = task.completed ? 'line-through' : 'none';
+          span.style.color = task.completed ? 'var(--text-done)' : '';
         });
 
         var span = document.createElement('span');
