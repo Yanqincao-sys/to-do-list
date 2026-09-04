@@ -416,7 +416,7 @@
     function render() {
       var visibleTasks = tasks.filter(function(task) {
         if (task.date > todayStr()) return false;
-        if (currentFilter === 'active') return !task.completed;
+        if (currentFilter === 'active') return !task.completed || task.completedDate === todayStr();
         if (currentFilter === 'done') return task.completed;
         return true;
       });
@@ -433,6 +433,7 @@
         checkbox.checked = task.completed;
         checkbox.addEventListener('change', function() {
           task.completed = checkbox.checked;
+          task.completedDate = task.completed ? todayStr() : null;
           saveTasks();
           li.classList.toggle('done', task.completed);
           span.style.textDecoration = task.completed ? 'line-through' : 'none';
